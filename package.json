@@ -1,0 +1,24 @@
+{
+  "name": "cmb-open",
+  "version": "1.0.0",
+  "description": "掌上生活开放平台（CMB Life Open） Node.js SDK",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourtion/node-cmb-open.git"
+  },
+  "keywords": [
+    "CMB",
+    "CMB Life",
+    "掌上生活"
+  ],
+  "author": "Yourtion <yourtion@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourtion/node-cmb-open/issues"
+  },
+  "homepage": "https://github.com/yourtion/node-cmb-open#readme"
+}
