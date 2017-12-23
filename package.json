@@ -1,6 +1,6 @@
 {
   "name": "cmb-open",
-  "version": "0.2.0",
+  "version": "1.0.0",
   "description": "掌上生活开放平台（CMB Life Open） Node.js SDK",
   "main": "index.js",
   "scripts": {
