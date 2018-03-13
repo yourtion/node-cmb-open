@@ -14,7 +14,7 @@
     "lint": "tslint --project tsconfig.json --fix",
     "clean": "rm -rf dist",
     "compile": "tsc",
-    "prepublishOnly": "npm run clean && npm run compile && npm run test:cov",
+    "prepublishOnly": "npm run clean && npm run compile",
     "postpublish": "npm run tag"
   },
   "repository": {
