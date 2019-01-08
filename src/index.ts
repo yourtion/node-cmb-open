@@ -6,14 +6,25 @@ import * as querystring from "querystring";
 const PRIFIX = "cmblife://";
 const HOST = "open.cmbchina.com";
 
-function pad(n: number) { return n < 10 ? "0" + n : n; }
+function pad(n: number) {
+  return n < 10 ? "0" + n : n;
+}
 
 function dateStr(d = new Date()) {
-  return d.getFullYear().toString() + pad(d.getMonth() + 1) + pad(d.getDate()) + pad(d.getHours()) + pad(d.getMinutes()) + pad(d.getSeconds());
+  return (
+    d.getFullYear().toString() +
+    pad(d.getMonth() + 1) +
+    pad(d.getDate()) +
+    pad(d.getHours()) +
+    pad(d.getMinutes()) +
+    pad(d.getSeconds())
+  );
 }
 
 function randomString(num: number) {
-  return randomBytes(num).toString("hex").substr(0, num);
+  return randomBytes(num)
+    .toString("hex")
+    .substr(0, num);
 }
 
 /**
@@ -23,7 +34,7 @@ function randomString(num: number) {
  * @param {String} data 数据
  * @returns {Promise}
  */
-function request(params: any, data: any) {
+function request(params: Record<string, any>, data?: string | Buffer): Promise<Record<string, any>> {
   // eslint-disable-next-line
   return new Promise((resolve, reject) => {
     const req = https.request(params, (response) => {
@@ -42,7 +53,9 @@ function request(params: any, data: any) {
     req.on("error", (err) => {
       return reject(err);
     });
-    if (data) { req.write(data); }
+    if (data) {
+      req.write(data);
+    }
     req.end();
   });
 }
@@ -57,14 +70,18 @@ function request(params: any, data: any) {
  */
 function post(hostname: string, path: string, data: object) {
   const dataString = querystring.stringify(data);
-  return request({
-    hostname, path,
-    method: "POST",
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      "Content-Length": Buffer.byteLength(dataString, "utf8"),
+  return request(
+    {
+      hostname,
+      path,
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Length": Buffer.byteLength(dataString, "utf8"),
+      },
     },
-  }, dataString);
+    dataString,
+  );
 }
 
 export interface IOptions {
@@ -76,19 +93,28 @@ export interface IOptions {
   publicKey?: string;
 }
 
+export interface IAccessTokenRes extends Record<string, any> {
+  respCode: string;
+  respMsg: string;
+  date: string;
+  sign: string;
+  accessToken?: string;
+  openId?: string;
+  expiresIn?: string;
+}
+
 /**
  * 招行掌上生活开放平台
  *
  * @class CMB
  */
 export default class CMB {
-
   private mid: string;
   private aid: string;
   private key: string;
   private defaultType: string;
   private host: string;
-  private publicKey: string|Buffer;
+  private publicKey: string | Buffer;
 
   /**
    * Creates an instance of CMB.
@@ -120,15 +146,19 @@ export default class CMB {
    * @returns {Object} 添加签名的数据
    * @memberof CMB
    */
-  public _signOrg(prifix: string, data: any) {
-    if (!data.date) { data.date = dateStr(); }
-    if (!data.random) { data.random = randomString(16); }
+  public _signOrg(prifix: string, data: Record<string, any>) {
+    if (!data.date) {
+      data.date = dateStr();
+    }
+    if (!data.random) {
+      data.random = randomString(16);
+    }
     const keys = Object.keys(data).sort();
     const strArr = [];
     for (const key of keys) {
-      strArr.push(`${ key }=${ data[key] }`);
+      strArr.push(`${key}=${data[key]}`);
     }
-    const signStr = `${ prifix }?${ strArr.join("&") }`;
+    const signStr = `${prifix}?${strArr.join("&")}`;
     const signFn = createSign("RSA-SHA256");
     signFn.update(signStr);
     const sign = signFn.sign(this.key, "base64");
@@ -145,7 +175,7 @@ export default class CMB {
    * @returns {Object} 添加签名的数据
    * @memberof CMB
    */
-  public _signJson(funcName: string, data: any) {
+  public _signJson(funcName: string, data: Record<string, any>) {
     return this._signOrg(funcName + ".json", data);
   }
 
@@ -158,27 +188,29 @@ export default class CMB {
    * @returns {String} 包含签名的link
    * @memberof CMB
    */
-  public _signCmblife(funcName: string, data: any) {
+  public _signCmblife(funcName: string, data: Record<string, any>) {
     const signData = this._signOrg(PRIFIX + funcName, data);
     const keys = Object.keys(signData);
     const strArr = [];
     for (const key of keys) {
-      strArr.push(`${ key }=${ encodeURIComponent(signData[key]) }`);
+      strArr.push(`${key}=${encodeURIComponent(signData[key])}`);
     }
-    return `${ PRIFIX }${ funcName }?${ strArr.join("&") }`;
+    return `${PRIFIX}${funcName}?${strArr.join("&")}`;
   }
 
-  public verifyRespons(res: any) {
-    if (!this.publicKey || !res.sign) { return false; }
+  public verifyRespons(res: Record<string, any>) {
+    if (!this.publicKey || !res.sign) {
+      return false;
+    }
     const verify = createVerify("SHA256");
     const signature = new Buffer(res.sign, "base64");
     delete res.sign;
     const keys = Object.keys(res).sort();
     const strArr = [];
     for (const key of keys) {
-      strArr.push(`${ key }=${ res[key] }`);
+      strArr.push(`${key}=${res[key]}`);
     }
-    const signStr = `${ strArr.join("&") }`;
+    const signStr = `${strArr.join("&")}`;
     verify.update(signStr);
     return verify.verify(this.publicKey, signature);
   }
@@ -222,7 +254,7 @@ export default class CMB {
       code,
     };
     const signData = this._signJson("accessToken", data);
-    return post(this.host, "/AccessGateway/transIn/accessToken.json", signData);
+    return post(this.host, "/AccessGateway/transIn/accessToken.json", signData) as Promise<IAccessTokenRes>;
   }
 
   /**
@@ -232,17 +264,17 @@ export default class CMB {
    */
   public increaseTreasure(openid: string, amount: number) {
     const data = {
-        openId: openid,
-        mid: this.mid,
-        aid: this.aid,
-        random: Date.now(),
-        treasureType: 0,
-        treasureId: 0,
-        treasureAmount: amount,
-        refToken: Date.now(),
-      };
+      openId: openid,
+      mid: this.mid,
+      aid: this.aid,
+      random: Date.now(),
+      treasureType: 0,
+      treasureId: 0,
+      treasureAmount: amount,
+      refToken: Date.now(),
+    };
     const signData = this._signJson("increaseTreasure", data);
-      // console.log(signData)
+    // console.log(signData)
     return post(this.host, "/AccessGateway/transIn/increaseTreasure.json", signData);
   }
 
@@ -262,5 +294,4 @@ export default class CMB {
     const signData = this._signJson("queryIncreaseTreasure", data);
     return post(this.host, "/AccessGateway/transIn/queryIncreaseTreasure.json", signData);
   }
-
 }
