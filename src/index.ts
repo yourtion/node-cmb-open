@@ -30,9 +30,8 @@ function randomString(num: number) {
 /**
  * request
  *
- * @param {Object} params 参数
- * @param {String} data 数据
- * @returns {Promise}
+ * @param params 参数
+ * @param data 数据
  */
 function request(params: Record<string, any>, data?: string | Buffer): Promise<Record<string, any>> {
   // eslint-disable-next-line
@@ -63,10 +62,9 @@ function request(params: Record<string, any>, data?: string | Buffer): Promise<R
 /**
  * POST
  *
- * @param {string} hostname 主机
- * @param {string} path 路径
- * @param {Object} data 数据
- * @returns {Promise}
+ * @param hostname 主机
+ * @param path 路径
+ * @param data 数据
  */
 function post(hostname: string, path: string, data: object) {
   const dataString = querystring.stringify(data);
@@ -119,14 +117,13 @@ export default class CMB {
   /**
    * Creates an instance of CMB.
    *
-   * @param {Object} options - 配置参数
-   * @param {String} options.mid - 商户号
-   * @param {String} options.aid - 唯一应用号
-   * @param {String} options.key - RSA私钥路径
-   * @param {String} [options.publicKey] - RSA公钥路径
-   * @param {String} [options.defaultType] - 默认跳转方式"app"、"h5"
-   * @param {String} [options.host] - 服务器地址
-   * @memberof CMB
+   * @param options - 配置参数
+   * @param options.mid - 商户号
+   * @param options.aid - 唯一应用号
+   * @param options.key - RSA私钥路径
+   * @param [options.publicKey] - RSA公钥路径
+   * @param [options.defaultType] - 默认跳转方式"app"、"h5"
+   * @param [options.host] - 服务器地址
    */
   constructor(options: IOptions) {
     this.mid = options.mid;
@@ -141,10 +138,9 @@ export default class CMB {
    * 获取签名
    * {@link https://open.cmbchina.com/Platform/#/resource/document/signVerify signVerify}
    *
-   * @param {String} prifix 前缀
-   * @param {Object} data 签名数据
-   * @returns {Object} 添加签名的数据
-   * @memberof CMB
+   * @param prifix 前缀
+   * @param data 签名数据
+   * @returns 添加签名的数据
    */
   public _signOrg(prifix: string, data: Record<string, any>) {
     if (!data.date) {
@@ -170,10 +166,9 @@ export default class CMB {
    * 获取JSON签名
    * @see _signOrg
    *
-   * @param {String} funcName 调用方法
-   * @param {Object} data 签名数据
-   * @returns {Object} 添加签名的数据
-   * @memberof CMB
+   * @param funcName 调用方法
+   * @param data 签名数据
+   * @returns 添加签名的数据
    */
   public _signJson(funcName: string, data: Record<string, any>) {
     return this._signOrg(funcName + ".json", data);
@@ -183,10 +178,9 @@ export default class CMB {
    * 获取CMBLife签名链接
    * @see _signOrg
    *
-   * @param {String} funcName 调用方法
-   * @param {Object} data 签名数据
-   * @returns {String} 包含签名的link
-   * @memberof CMB
+   * @param funcName 调用方法
+   * @param data 签名数据
+   * @returns 包含签名的link
    */
   public _signCmblife(funcName: string, data: Record<string, any>) {
     const signData = this._signOrg(PRIFIX + funcName, data);
@@ -219,10 +213,9 @@ export default class CMB {
    * 授权登录
    * {@link https://open.cmbchina.com/Platform/#/resource/document/approvalAPI approvalAPI}
    *
-   * @param {String} state client端的状态值
-   * @param {String} [callback] 成功授权后的回调
-   * @returns {String} 授权登录的url
-   * @memberof CMB
+   * @param state client端的状态值
+   * @param [callback] 成功授权后的回调
+   * @returns 授权登录的url
    */
   public getApproval(state: string, callback: string) {
     const data = {
@@ -241,9 +234,7 @@ export default class CMB {
    * 获取 AccessToken
    * @see {@link https://open.cmbchina.com/Platform/#/resource/document/approvalAPI accessToken}
    *
-   * @param {String} code 临时授权码
-   * @returns {Object} 授权结果
-   * @memberof CMB
+   * @param code 临时授权码
    */
   public getAccessToken(code: string) {
     const data = {
@@ -258,9 +249,9 @@ export default class CMB {
   }
 
   /**
-   * 获取积分接口
-   * @param {string} openid
-   * @param {string} amount
+   * 发放积分接口
+   * @param openid
+   * @param amount
    */
   public increaseTreasure(openid: string, amount: number) {
     const data = {
@@ -279,8 +270,8 @@ export default class CMB {
   }
 
   /**
-   * 增加处理状态查询接口
-   * @param {string} openid
+   * 处理状态查询接口
+   * @param openid
    */
   public queryIncreaseTreasure(openid: string, refToken: string) {
     const data = {
